@@ -6,6 +6,8 @@ __pycache__/
 # Project
 .idea
 .image_bash_history
+*.csv
+*.zip
 
 # C extensions
 *.so
