@@ -117,6 +117,9 @@ def main():
     test = test.set_index(['date', 'store_nbr', 'family']).sort_values('id')
 
     calendar = pd.DataFrame(index=pd.date_range('2013-01-01', '2017-08-31')).to_period('D')
+    print(calendar)
+
+
     oil = pd.read_csv('src/data/oil.csv',
                       parse_dates=['date'], infer_datetime_format=True,
                       index_col='date').to_period('D')
@@ -135,7 +138,7 @@ def main():
                       index_col='date').to_period('D')
     hol = hol[hol.locale == 'National']  # I'm only taking National holiday so there's no false positive.
     hol = hol.groupby(hol.index).first()  # Removing duplicated holiday at the same date
-
+    #
     calendar = calendar.join(hol)  # Joining calendar with holiday dataset
     calendar['dofw'] = calendar.index.dayofweek  # Weekly day
     calendar['wd'] = 1
@@ -230,47 +233,47 @@ def main():
 
     print('RMSLE for low value :', np.sqrt(msle(true_low, pred_low)))
     print('MAE for low value :', mae(true_low, pred_low))
-
-    true_high = [255]
-    pred_high = [269]
-
-    print('RMSLE for high value :', np.sqrt(msle(true_high, pred_high)))
-    print('MAE for high value :', mae(true_high, pred_high))
-
-    ymean = yfit_lnr.append(ypred_lnr)
-    school = ymean.loc(axis=1)['sales', :, 'SCHOOL AND OFFICE SUPPLIES']
-    ymean = ymean.join(school.shift(1), rsuffix='lag1')  # I'm also adding school lag for it's cyclic yearly.
-    x = x.loc['2017-05-01':]
-
-    x = x.join(ymean)  # Concating linear result
-    xtest = xtest.join(ymean)
-
-    y = y.loc['2017-05-01':]
-
-    print(y.isna().sum().sum())
-
-    model = CustomRegressor(n_jobs=-1, verbose=1)
-    model.fit(x, y)
-    y_pred = pd.DataFrame(model.predict(x), index=x.index, columns=y.columns)
-
-    from sklearn.metrics import mean_squared_log_error
-    y_pred = y_pred.stack(['store_nbr', 'family']).clip(0.)
-    y_ = y.stack(['store_nbr', 'family']).clip(0.)
-
-    y_['pred'] = y_pred.values
-    print(y_.groupby('family').apply(lambda r: np.sqrt(np.sqrt(mean_squared_log_error(r['sales'], r['pred'])))))
-    # Looking at error
-    print('RMSLE : ', np.sqrt(np.sqrt(msle(y_['sales'], y_['pred']))))
-
-    y_pred.isna().sum()
-
-    ypred = pd.DataFrame(model.predict(xtest), index=xtest.index, columns=y.columns).clip(0.)
-
-    ypred = ypred.stack(['store_nbr', 'family'])
-
-    sub = pd.read_csv('src/data/sample_submission.csv')
-    sub['sales'] = ypred.values
-    sub.to_csv('submission.csv', index=False)  # Submit
+    #
+    # true_high = [255]
+    # pred_high = [269]
+    #
+    # print('RMSLE for high value :', np.sqrt(msle(true_high, pred_high)))
+    # print('MAE for high value :', mae(true_high, pred_high))
+    #
+    # ymean = yfit_lnr.append(ypred_lnr)
+    # school = ymean.loc(axis=1)['sales', :, 'SCHOOL AND OFFICE SUPPLIES']
+    # ymean = ymean.join(school.shift(1), rsuffix='lag1')  # I'm also adding school lag for it's cyclic yearly.
+    # x = x.loc['2017-05-01':]
+    #
+    # x = x.join(ymean)  # Concating linear result
+    # xtest = xtest.join(ymean)
+    #
+    # y = y.loc['2017-05-01':]
+    #
+    # print(y.isna().sum().sum())
+    #
+    # model = CustomRegressor(n_jobs=-1, verbose=1)
+    # model.fit(x, y)
+    # y_pred = pd.DataFrame(model.predict(x), index=x.index, columns=y.columns)
+    #
+    # from sklearn.metrics import mean_squared_log_error
+    # y_pred = y_pred.stack(['store_nbr', 'family']).clip(0.)
+    # y_ = y.stack(['store_nbr', 'family']).clip(0.)
+    #
+    # y_['pred'] = y_pred.values
+    # print(y_.groupby('family').apply(lambda r: np.sqrt(np.sqrt(mean_squared_log_error(r['sales'], r['pred'])))))
+    # # Looking at error
+    # print('RMSLE : ', np.sqrt(np.sqrt(msle(y_['sales'], y_['pred']))))
+    #
+    # y_pred.isna().sum()
+    #
+    # ypred = pd.DataFrame(model.predict(xtest), index=xtest.index, columns=y.columns).clip(0.)
+    #
+    # ypred = ypred.stack(['store_nbr', 'family'])
+    #
+    # sub = pd.read_csv('src/data/sample_submission.csv')
+    # sub['sales'] = ypred.values
+    # sub.to_csv('submission.csv', index=False)  # Submit
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,7 @@ __pycache__/
 .image_bash_history
 *.csv
 *.zip
+*.ipynb
 
 # C extensions
 *.so
