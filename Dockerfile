@@ -28,6 +28,9 @@ RUN rm requirements.txt
 RUN touch /root/.image_bash_history
 RUN touch /root/.bashrc
 
+RUN mkdir /root/.kaggle
+COPY kaggle.priv.json /root/.kaggle/kaggle.json
+
 ENV PYTHONPATH "${PYTHONPATH}:/app/src"
 
 USER root

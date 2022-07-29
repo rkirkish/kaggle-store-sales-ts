@@ -94,7 +94,7 @@ class CustomRegressor():
         return np.stack(y_pred, axis=1)
 
 
-def make_lags(x, lags = 1) : #Fungsi untuk membuat fitur lags
+def make_lags(x, lags = 1) :
     lags = lags
     x_ = x.copy()
     for i in range(lags) :
@@ -228,35 +228,23 @@ def main():
     print(y_.groupby('family').apply(lambda r: mae(r['sales'], r['mean'])))
     print('Mean RMSLE :', mae(y, yfit_mean))
 
-    true_low = [2]
-    pred_low = [4]
+    ymean = yfit_lnr.append(ypred_lnr)
+    school = ymean.loc(axis=1)['sales', :, 'SCHOOL AND OFFICE SUPPLIES']
+    ymean = ymean.join(school.shift(1), rsuffix='lag1')  # I'm also adding school lag for it's cyclic yearly.
+    x = x.loc['2017-05-01':]
 
-    print('RMSLE for low value :', np.sqrt(msle(true_low, pred_low)))
-    print('MAE for low value :', mae(true_low, pred_low))
-    #
-    # true_high = [255]
-    # pred_high = [269]
-    #
-    # print('RMSLE for high value :', np.sqrt(msle(true_high, pred_high)))
-    # print('MAE for high value :', mae(true_high, pred_high))
-    #
-    # ymean = yfit_lnr.append(ypred_lnr)
-    # school = ymean.loc(axis=1)['sales', :, 'SCHOOL AND OFFICE SUPPLIES']
-    # ymean = ymean.join(school.shift(1), rsuffix='lag1')  # I'm also adding school lag for it's cyclic yearly.
-    # x = x.loc['2017-05-01':]
-    #
-    # x = x.join(ymean)  # Concating linear result
-    # xtest = xtest.join(ymean)
-    #
-    # y = y.loc['2017-05-01':]
-    #
-    # print(y.isna().sum().sum())
-    #
-    # model = CustomRegressor(n_jobs=-1, verbose=1)
-    # model.fit(x, y)
-    # y_pred = pd.DataFrame(model.predict(x), index=x.index, columns=y.columns)
-    #
-    # from sklearn.metrics import mean_squared_log_error
+    x = x.join(ymean)  # Concating linear result
+    xtest = xtest.join(ymean)
+
+    y = y.loc['2017-05-01':]
+
+    print(y.isna().sum().sum())
+
+    # This is the section of code that
+    model = CustomRegressor(n_jobs=-1, verbose=1)
+    model.fit(x, y)
+    y_pred = pd.DataFrame(model.predict(x), index=x.index, columns=y.columns)
+
     # y_pred = y_pred.stack(['store_nbr', 'family']).clip(0.)
     # y_ = y.stack(['store_nbr', 'family']).clip(0.)
     #
