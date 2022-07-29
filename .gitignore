@@ -9,7 +9,7 @@ __pycache__/
 *.csv
 *.zip
 *.ipynb
-*.priv.*
+kaggle.json
 
 # C extensions
 *.so
