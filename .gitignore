@@ -9,7 +9,7 @@ __pycache__/
 *.csv
 *.zip
 *.ipynb
-*.priv
+*.priv.*
 
 # C extensions
 *.so
